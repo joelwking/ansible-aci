@@ -53,7 +53,7 @@ options:
 
 EXAMPLES = '''
        
-    export PYTHONPATH=/home/administrator/ansible/lib:
+    export PYTHONPATH=/home/administrator/ansible/lib:/home/administrator/ansible/lib/ansible/modules/extras/network/
     
     ./bin/ansible prod-01 -m aci_install_config.py  -a "xml_file=/home/administrator/ansible/CFGS/aaaUser_Student9.xml URI=/api/mo/uni/userext/user-Student9.xml host=prod-01 username=admin password=FOO"
 
