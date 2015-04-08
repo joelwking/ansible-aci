@@ -9,6 +9,7 @@
      30 March 2015  |  1.1 - tested version using playbook, added output of "content" to error message
      31 March 2015  |  1.2 - added documentation
       7 April 2015  |  2.0 - refactor for github
+      8 April 2015  |  2.1 - added missing documentation
    
 """
 
@@ -16,13 +17,15 @@ DOCUMENTATION = '''
 ---
 module: aci_install_config
 author: Joel W. King, World Wide Technology
-version_added: "2.0"
+version_added: "2.1"
 short_description: Load a configuration file into a device running NXOS feature nxapi
 description:
     - This module reads an XML configuration file and posts to the URI specified to the APIC northbound interface
 
       The module writes a log file to the /tmp directory and imbeds the julian date in the file name. 
       For example, this file is for day 50, e.g. /tmp/nxapi_install_config_050.log
+
+      Refer to the Cisco APIC REST API User Guide for more info on xml and URI formats.
 
  
 requirements:
@@ -47,6 +50,11 @@ options:
     xml_file:
         description:
             - Path to the file containing the XML configuration data.
+        required: true
+
+    URI:
+        description:
+            - The URL required by APIC to issue the request.
         required: true
 
 '''
