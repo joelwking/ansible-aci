@@ -1,0 +1,4 @@
+<fvBD unkMcastAct="flood" unkMacUcastAct="proxy" unicastRoute="yes" ownerTag="" ownerKey="" name="Hammergren" mac="00:22:BD:F8:19:FF" dn="uni/tn-Hammergren/BD-Hammergren" descr="Ansible ACI Demo Tenant" arpFlood="no">
+<fvRsCtx tnFvCtxName="HG_private"/>
+<fvRsIgmpsn tnIgmpSnoopPolName=""/>
+</fvBD>

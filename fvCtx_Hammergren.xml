@@ -1,0 +1,6 @@
+<fvCtx pcEnfPref="enforced" ownerTag="" ownerKey="" name="HG_private" knwMcastAct="permit" dn="uni/tn-Hammergren/ctx-HG_private" descr="Ansible ACI Demo Tenant">
+<fvRsBgpCtxPol tnBgpCtxPolName=""/>
+<vzAny name="" descr="" matchT="AtleastOne"/>
+<fvRsOspfCtxPol tnOspfCtxPolName=""/>
+<fvRsCtxToEpRet tnFvEpRetPolName=""/>
+</fvCtx>
