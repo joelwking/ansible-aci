@@ -10,6 +10,7 @@
 # Version     Date           Comments
 # ----------- ------------   -------------------------------------------------
 # 2.0         7 April 2015   Refactored for github
+# 2.1        15 April 2015   Removed ppXML, we are using json
 # 
 #
 """
@@ -24,9 +25,9 @@ class Connection(object):
    
     """
     def __init__(self):                               
-        self.version = "Ver 2.0"                      # Version information
-        self.debug = True                             # When enabled, prints more info for debugging
-        self.transporttypes = ["http","https"]        # Valid transport types
+        self.version = "Ver 2.1"                      # Version information
+        self.debug = False                            # When enabled, prints more info for debugging
+        self.transporttypes = ["http", "https"]       # Valid transport types
         self.transport = self.transporttypes[0]       # use HTTP by default
                                                       
         self.controllername = "192.0.2.1"             # IP address or hostname of the controller
@@ -186,7 +187,6 @@ class Connection(object):
             return(999)
         else:
             self.content =  r.content.encode("utf-8")
-            self.ppXML()
             if self.debug: 
                print "genericPOST\nstatus_code:\t%s \nurl:\t%s \ncontent:\t%s \nXML:\t%s" % \
                      (r.status_code, r.url, self.content, self.generic_XML)            
@@ -205,21 +205,11 @@ class Connection(object):
             return(999)
         else:
             self.content =  r.content.encode("utf-8")
-            self.ppXML()
             if self.debug: 
                print "genericGET\nstatus_code:\t%s \nurl:\t%s \ncontent:\t%s " % \
                      (r.status_code, r.url, self.content)            
             return(r.status_code)
-#
-#
-#
-    def ppXML(self):
-        """ pretty print the XML  in self.content and output to self.prettyXML"""
-        if self.debug:
-            print "ppXML content: %s" % self.content
-        XML = xml.dom.minidom.parseString(self.content)
-        self.prettyXML = XML.toprettyxml()
-        return
+
 #
 #
 #
