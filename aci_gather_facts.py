@@ -41,7 +41,7 @@ options:
             - Login password
         required: true
 
-    query-target-fltr: 
+    queryfilter: 
         description:
             - a logical filter to be applied to the response
         required: false
@@ -56,8 +56,18 @@ options:
 EXAMPLES = '''
        
     export PYTHONPATH=/home/administrator/ansible/lib:/home/administrator/ansible/lib/ansible/modules/extras/network/
+
+    This does a query of users configure with 'aci_trainer' in the description field of their account:
     
-    ./bin/ansible prod-01 -m aci_gather_facts.py  -a "query-target-fltr=eq(aaaUser.descr,'aci_trainer') URI=/api/class/aaaUser.json host=10.255.23.121 username=admin password=FOO"
+    ./hacking/test-module -m /home/administrator/ansible/lib/ansible/modules/extras/network/aci_gather_facts.py -a 'queryfilter=eq(aaaUser.descr,\"aci_trainer\") URI=/api/class/aaaUser.json host=10.255.23.121 username=admin password=FOO'
+
+
+    /etc/ansible/hosts 
+    [NGDC]
+    APIC-NGDC-East-1 ansible_connection=local ansible_ssh_user=administrator
+
+    ./bin/ansible APIC-NGDC-East-1 -m aci_gather_facts.py  -a 'queryfilter=eq(aaaUser.descr,\"aci_trainer\") URI=/api/class/aaaUser.json host=10.255.23.121 username=admin password=FOO'
+ 
 
 
 '''
@@ -74,7 +84,7 @@ import AnsibleACI
 # LOGGING
 # ---------------------------------------------------------------------------
 
-logfilename = __name__
+logfilename = "aci_gather_facts"
 logger = logging.getLogger(logfilename)
 hdlrObj = logging.FileHandler("/tmp/%s_%s.log" % (logfilename, time.strftime("%j")))
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -87,7 +97,7 @@ logger.setLevel(logging.INFO)
 # PROCESS
 # ---------------------------------------------------------------------------
 
-def process(cntrl, xml):
+def process(cntrl):
     """ We have all are variables and parameters set in the object, attempt to 
         login and post the data to the APIC
     """
@@ -97,9 +107,9 @@ def process(cntrl, xml):
 
     rc = cntrl.genericGET()
     if rc == 200:
-        return (0, "%s: %s" % (rc, httplib.responses[rc]))
+        return (0, format_content(cntrl.get_content()))
     else:
-        return (1, "%s: %s %s" % (rc, httplib.responses[rc], format_content(cntrl.get_content())))
+        return (1, "%s: %s" % (rc, httplib.responses[rc]))
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +118,7 @@ def process(cntrl, xml):
 def format_content(content):
     """ formats the content into an Ansible fact  class : [ mo : 'attributes', mo : 'attributes', ...]
     """
-    aci_facts = {}
+    aci_facts = {}                                         # setup_result = { 'ansible_facts': {} }
     content = json.loads(content)["imdata"]                # remove the IMDATA wrapper
     for item in content:                                   # content is a list of one or more elements return for the class query
         d_item = dict(item)
@@ -133,7 +143,7 @@ def main():
 
     module = AnsibleModule(
         argument_spec = dict(
-            query-target-fltr = dict(required=False),
+            queryfilter = dict(required=False),
             URI = dict(required=True),
             host = dict(required=True),
             username = dict(required=True),
@@ -148,11 +158,13 @@ def main():
     cntrl.setcontrollerIP(module.params["host"])
     cntrl.setUsername(module.params["username"])                               
     cntrl.setPassword(module.params["password"])
+    try:
+        queryfilter = "?query-target-filter=" + module.params["queryfilter"]
+    except KeyError:
+        queryfilter = ""
 
-    if query-target-fltr:
-        query-target-fltr = "?" + query-target-fltr
-
-    cntrl.setgeneric_URL("%s://%s" + module.params["URI"] + query-target-fltr)
+    cntrl.setgeneric_URL("%s://%s" + module.params["URI"] + queryfilter)
+    logger.info("DEVICE=%s URL=%s" %  (module.params["host"], cntrl.generic_URL))
                                   
     code, response = process(cntrl)
 
@@ -161,7 +173,7 @@ def main():
         module.fail_json(msg=response)
     else:
         logger.info('DEVICE=%s STATUS=%s' % (module.params["host"], code))
-        module.exit_json(changed=False, content=response)
+        module.exit_json(**response)
 
     cntrl.aaaLogout()  
     return code
