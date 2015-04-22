@@ -7,6 +7,7 @@
      Revision history:
      21 April 2015  |  1.0 - initial release
      22 April 2015  |  1.1 - except KeyError should be TypeError for optional arguments
+                       1.2 - output format change of returned facts
  
    
 """
@@ -15,12 +16,12 @@ DOCUMENTATION = '''
 ---
 module: aci_gather_facts
 author: Joel W. King, World Wide Technology
-version_added: "1.1"
+version_added: "1.2"
 short_description: query the APIC controller for facts about a specified class or managed object
 description:
     - This module issues a class or managed object query and returns the answer set as facts for use in a playbook
 
-      Refer to the Cisco APIC REST API User Guide for more info on xml and URI formats.
+      Refer to the Cisco APIC REST API User Guide for more info on filters and URI formats.
 
  
 requirements:
@@ -58,6 +59,7 @@ EXAMPLES = '''
        
     export PYTHONPATH=/home/administrator/ansible/lib:/home/administrator/ansible/lib/ansible/modules/extras/network/
 
+
     This does a query of users configure with 'aci_trainer' in the description field of their account:
     
     ./hacking/test-module -m /home/administrator/ansible/lib/ansible/modules/extras/network/aci_gather_facts.py -a 'queryfilter=eq(aaaUser.descr,\"aci_trainer\") URI=/api/class/aaaUser.json host=10.255.23.121 username=admin password=FOO'
@@ -69,7 +71,40 @@ EXAMPLES = '''
 
     ./bin/ansible APIC-NGDC-East-1 -m aci_gather_facts.py  -a 'queryfilter=eq(aaaUser.descr,\"aci_trainer\") URI=/api/class/aaaUser.json host=10.255.23.121 username=admin password=FOO'
  
+    ./bin/ansible APIC-NGDC-East-1 -m aci_gather_facts.py  -a 'URI=/api/class/hvsAdj.json host=10.255.23.121 username=admin password=FOO'
 
+    ./bin/ansible APIC-NGDC-East-1 -m aci_gather_facts.py  -a 'queryfilter=eq(compVm.state,\"poweredOn\" URI=/api/class/compVm.json host=10.255.23.121 username=admin password=FOO'
+
+
+    $ cat aci_gather_facts.yml
+    ---
+    - name: Ansible ACI Demo of gathering facts using a class query
+      hosts:  APIC-NGDC-East-1
+      connection: local
+      gather_facts: no
+
+      tasks:
+      - name: Class query for all known Tenants
+        aci_gather_facts:  URI=/api/class/fvTenant.json host={{hostname}} username=admin password={{password}}
+
+      - name: debug Tenant
+        debug: var=fvTenant
+
+      - name: Class query for all local users that are ACI trainers, the descr field contains the string "aci_trainer"
+        aci_gather_facts:  URI=/api/class/aaaUser.json queryfilter=eq(aaaUser.descr,\"aci_trainer\") host={{hostname}} username=admin password={{password}}
+
+      - name:  debug local users
+        debug: var=item.value.name
+        with_dict: aaaUser
+
+      - name:  Class query for powered on virtual machines
+        aci_gather_facts: URI=/api/class/compVm.json queryfilter=eq(compVm.state,\"poweredOn\"  host={{hostname}} username=admin password={{password}}
+
+      - name: debug virtual machines
+        debug: var=compVm
+
+
+    $ ./bin/ansible-playbook aci_gather_facts.yml
 
 '''
 
@@ -117,23 +152,45 @@ def process(cntrl):
 # FORMAT_CONTENT
 # ---------------------------------------------------------------------------
 def format_content(content):
-    """ formats the content into an Ansible fact  class : [ mo : 'attributes', mo : 'attributes', ...]
+    """ formats the content into an Ansible fact 
+
+    from ACI a class query returns:
+   
+     dict     list       dict        dict
+    imdata    [ aaaUser: attributes: elements, ...]
+    totalcount
+    
+    Here is an example of the core setup module
+
+    $ ./bin/ansible 10.255.40.207 -m setup --ask-pass -a 'filter=ansible_all_ipv4_addresses'
+    SSH password:
+    10.255.40.207 | success >> {
+        "ansible_facts": {
+            "ansible_all_ipv4_addresses": [
+                "10.255.40.207"
+            ]
+        },
+        "changed": false
+    }
+
     """
-    aci_facts = {}                                         # setup_result = { 'ansible_facts': {} }
+    element = {}                                           # dictionary to hold the class
+    result = { 'ansible_facts': {} }                       # the result is a dictionary with one element called 'ansible_facts'
     content = json.loads(content)["imdata"]                # remove the IMDATA wrapper
-    for item in content:                                   # content is a list of one or more elements return for the class query
+    for item in content:                                   # content is a *list* of one or more elements returned for the class query
         d_item = dict(item)
-        for key in d_item.keys():                          # should be only one element
-            try:
-                aci_facts[key]
-            except KeyError:
-                aci_facts[key] = []                        # create a dictionary with the class as the first key and an empty list as the value
-            break
-        
-        mo = d_item[key]["attributes"]["dn"]
-        attributes = d_item[key]["attributes"]
-        aci_facts[key].append({mo: attributes})
-    return aci_facts
+        aci_class = d_item.keys()[0]                       # get the name of the class we queried
+        try:
+            element[aci_class]
+        except KeyError:
+            element[aci_class] = {}                        
+
+        mo = d_item[aci_class]["attributes"]["dn"]
+        attributes = d_item[aci_class]["attributes"]
+        element[aci_class][mo] = attributes
+
+    result["ansible_facts"] = element
+    return result
         
 
 # ---------------------------------------------------------------------------
