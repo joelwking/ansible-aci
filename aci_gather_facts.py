@@ -6,6 +6,7 @@
 
      Revision history:
      21 April 2015  |  1.0 - initial release
+     22 April 2015  |  1.1 - except KeyError should be TypeError for optional arguments
  
    
 """
@@ -14,7 +15,7 @@ DOCUMENTATION = '''
 ---
 module: aci_gather_facts
 author: Joel W. King, World Wide Technology
-version_added: "1.0"
+version_added: "1.1"
 short_description: query the APIC controller for facts about a specified class or managed object
 description:
     - This module issues a class or managed object query and returns the answer set as facts for use in a playbook
@@ -160,7 +161,7 @@ def main():
     cntrl.setPassword(module.params["password"])
     try:
         queryfilter = "?query-target-filter=" + module.params["queryfilter"]
-    except KeyError:
+    except TypeError:
         queryfilter = ""
 
     cntrl.setgeneric_URL("%s://%s" + module.params["URI"] + queryfilter)
