@@ -1,0 +1,11 @@
+<!-- Security Policy Filter for TCP Small servers -->
+<vzFilter ownerTag="" ownerKey="" name="TCP_SMALL_SERVERS" descr="Apply Filter for Ansible Demo">
+<vzEntry name="chargen" descr="" tcpRules="" stateful="no" sToPort="unspecified" sFromPort="unspecified" prot="tcp"
+icmpv6T="unspecified" icmpv4T="unspecified" etherT="ip" dToPort="19" dFromPort="19" arpOpc="unspecified" applyToFrag="no"/>
+<vzEntry name="discard" descr="" tcpRules="" stateful="no" sToPort="unspecified" sFromPort="unspecified" prot="tcp"
+icmpv6T="unspecified" icmpv4T="unspecified" etherT="ip" dToPort="9" dFromPort="9" arpOpc="unspecified" applyToFrag="no"/>
+<vzEntry name="echo" descr="" tcpRules="" stateful="no" sToPort="unspecified" sFromPort="unspecified" prot="tcp" icmpv6T="unspecified"
+icmpv4T="unspecified" etherT="ip" dToPort="7" dFromPort="7" arpOpc="unspecified" applyToFrag="no"/>
+<vzEntry name="daytime" descr="" tcpRules="" stateful="no" sToPort="unspecified" sFromPort="unspecified" prot="tcp"
+icmpv6T="unspecified" icmpv4T="unspecified" etherT="ip" dToPort="13" dFromPort="13" arpOpc="unspecified" applyToFrag="no"/>
+</vzFilter>
