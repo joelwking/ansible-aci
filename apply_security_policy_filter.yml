@@ -22,8 +22,9 @@
   - name:  Apply security policy filter to all tenants
     aci_install_config:
       xml_file: "{{local_path}}/{{filter}}"
-      URI: "/api/mo/uni/tn-{{item.value.name}}.xml"
+      URI: "/api/mo/uni/tn-{{item.name}}.xml"
       host: "{{hostname}}"
       username: admin
       password: "{{password}}"
-    with_dict: fvTenant
+    with_items: fvTenant
+

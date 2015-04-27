@@ -15,19 +15,12 @@
      username: admin
      password: "{{password}}"
 
-  # This managed object query returns one element, however, because the MO variable
-  # contains special characters in the name, e.g. / [  (see dn variable) we cannot reference
-  # the variable directly, however we can reference it using a with_dict
-  # it will only return one element.
-
-  - name: debug  vCenter object variable vendor
-    debug: var=item.value.vendor
-    with_dict: compCtrlr
-
-  - name: debug vCenter object variable model
-    debug: var=item.value.model
-    with_dict: compCtrlr
-
   - name: debug vCenter object by class (all fields)
     debug: var=compCtrlr
+
+  - name: debug  vCenter object variable hostOrIp
+    debug: var=compCtrlr[0].hostOrIp
+
+  - name: debug vCenter object variable model
+    debug: var=compCtrlr[0].model
 

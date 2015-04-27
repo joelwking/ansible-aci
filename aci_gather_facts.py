@@ -8,6 +8,7 @@
      21 April 2015  |  1.0 - initial release
      22 April 2015  |  1.1 - except KeyError should be TypeError for optional arguments
                        1.2 - output format change of returned facts
+     27 April 2015  |  1.3 - return a list of MOs rather than a dictionary, using the DN name for the key is an invalid variable name for Ansible
  
    
 """
@@ -156,9 +157,9 @@ def format_content(content):
 
     from ACI a class query returns:
    
-     dict     list       dict        dict
-    imdata    [ aaaUser: attributes: elements, ...]
-    totalcount
+     dict         list       dict        dict
+    "imdata"    [ aaaUser: attributes: elements, ...]
+    "totalcount"
     
     Here is an example of the core setup module
 
@@ -183,11 +184,10 @@ def format_content(content):
         try:
             element[aci_class]
         except KeyError:
-            element[aci_class] = {}                        
+            element[aci_class] = []                        # each returned MO is a list element
 
-        mo = d_item[aci_class]["attributes"]["dn"]
         attributes = d_item[aci_class]["attributes"]
-        element[aci_class][mo] = attributes
+        element[aci_class].append(attributes)              # append the MO to our class dictionary
 
     result["ansible_facts"] = element
     return result
