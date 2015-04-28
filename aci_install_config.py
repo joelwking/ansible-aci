@@ -10,6 +10,7 @@
      31 March 2015  |  1.2 - added documentation
       7 April 2015  |  2.0 - refactor for github
       8 April 2015  |  2.1 - added missing documentation
+     28 April 2015  |  2.2 - program documenttion updates
    
 """
 
@@ -17,8 +18,8 @@ DOCUMENTATION = '''
 ---
 module: aci_install_config
 author: Joel W. King, World Wide Technology
-version_added: "2.1"
-short_description: Load a configuration file into a device running NXOS feature nxapi
+version_added: "2.2"
+short_description: Loads a configuration file to the northbound interface of a Cisco ACI controller (APIC)
 description:
     - This module reads an XML configuration file and posts to the URI specified to the APIC northbound interface
 
