@@ -36,4 +36,13 @@
       username: admin
       password: "{{password}}"
 
+  - name: Get os of vm-107
+    aci_gather_facts:
+      URI: /api/mo/comp/prov-VMware/ctrlr-[NGDC-VC]-VC_Cont/vm-vm-107.json
+      host: "{{hostname}}"
+      username: admin
+      password: "{{password}}"
+
+  - name: Print os of vm-107
+    debug: var=compVm[0].os
 
