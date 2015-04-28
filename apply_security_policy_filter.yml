@@ -28,3 +28,12 @@
       password: "{{password}}"
     with_items: fvTenant
 
+  - name: Apply Service Contract to the ANSIBLE_DEMO tenant for testing
+    aci_install_config:
+      xml_file: "{{local_path}}/vzBrCP_ANSIBLE_DEMO.xml"
+      URI: "/api/mo/uni/tn-ANSIBLE_DEMO.xml"
+      host: "{{hostname}}"
+      username: admin
+      password: "{{password}}"
+
+
