@@ -9,6 +9,7 @@
      22 April 2015  |  1.1 - except KeyError should be TypeError for optional arguments
                        1.2 - output format change of returned facts
      27 April 2015  |  1.3 - return a list of MOs rather than a dictionary, using the DN name for the key is an invalid variable name for Ansible
+     14 May   2015  |  1.4 - modification for running under Ansible Tower
  
    
 """
@@ -17,7 +18,7 @@ DOCUMENTATION = '''
 ---
 module: aci_gather_facts
 author: Joel W. King, World Wide Technology
-version_added: "1.3"
+version_added: "1.4"
 short_description: query the APIC controller for facts about a specified class or managed object
 description:
     - This module issues a class or managed object query and returns the answer set as facts for use in a playbook
@@ -57,8 +58,12 @@ options:
 '''
 
 EXAMPLES = '''
+
+    When running Ansible (not using Tower) include in your PYTHONPATH the location of these modules
        
     export PYTHONPATH=/home/administrator/ansible/lib:/home/administrator/ansible/lib/ansible/modules/extras/network/
+
+    in the above example, Ansible was installed under /home/administrator/ and these moudules were placed in /extras/network
 
 
     This does a query of users configure with 'aci_trainer' in the description field of their account:
@@ -115,7 +120,20 @@ import logging
 import httplib
 import json
 
-import AnsibleACI
+# ---------------------------------------------------------------------------
+# IMPORT LOGIC 
+# ---------------------------------------------------------------------------
+"""
+    When running under Ansible Tower, put this module and AnsibleACI in 
+    /usr/share/ansible and modify /etc/ansible/ansible.cfg to include 
+    library        = /usr/share/ansible/
+"""
+try:
+    import AnsibleACI
+except ImportError:
+    sys.path.append("/usr/share/ansible")
+    import AnsibleACI
+
 
 # ---------------------------------------------------------------------------
 # LOGGING

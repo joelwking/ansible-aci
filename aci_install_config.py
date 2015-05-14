@@ -11,6 +11,7 @@
       7 April 2015  |  2.0 - refactor for github
       8 April 2015  |  2.1 - added missing documentation
      28 April 2015  |  2.2 - program documenttion updates
+     14 May   2015  |  2.3 - modification for running under Ansible Tower
    
 """
 
@@ -18,7 +19,7 @@ DOCUMENTATION = '''
 ---
 module: aci_install_config
 author: Joel W. King, World Wide Technology
-version_added: "2.2"
+version_added: "2.3"
 short_description: Loads a configuration file to the northbound interface of a Cisco ACI controller (APIC)
 description:
     - This module reads an XML configuration file and posts to the URI specified to the APIC northbound interface
@@ -61,8 +62,13 @@ options:
 '''
 
 EXAMPLES = '''
+
+    When running Ansible (not using Tower) include in your PYTHONPATH the location of these modules
        
     export PYTHONPATH=/home/administrator/ansible/lib:/home/administrator/ansible/lib/ansible/modules/extras/network/
+
+    in the above example, Ansible was installed under /home/administrator/ and these modules were placed in /extras/network
+ 
     
     ./bin/ansible prod-01 -m aci_install_config.py  -a "xml_file=/home/administrator/ansible/CFGS/aaaUser_Student9.xml URI=/api/mo/uni/userext/user-Student9.xml host=prod-01 username=admin password=FOO"
 
@@ -76,7 +82,19 @@ import time
 import logging
 import httplib
 
-import AnsibleACI
+# ---------------------------------------------------------------------------
+# IMPORT LOGIC 
+# ---------------------------------------------------------------------------
+"""
+    When running under Ansible Tower, put this module and AnsibleACI in 
+    /usr/share/ansible and modify /etc/ansible/ansible.cfg to include 
+    library        = /usr/share/ansible/
+"""
+try:
+    import AnsibleACI
+except ImportError:
+    sys.path.append("/usr/share/ansible")
+    import AnsibleACI
 
 # ---------------------------------------------------------------------------
 # LOGGING
