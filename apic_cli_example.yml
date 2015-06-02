@@ -1,0 +1,59 @@
+---
+#
+#   Copyright (c) 2015 World Wide Technology, Inc.
+#   All rights reserved.
+#
+#   author: Joel W. King, World Wide Technology
+#
+#   The APIC controller(s) are a cluster of Linux hosts managing the fabric.
+#   This playbook is an example of how to run Ansible on the APIC controller, as an
+#   alternative to using the REST API interface to the controller.
+#
+#   One use case for using the CLI rather than the rest interface is to upgrade the
+#   firmware on the controller and switches in the fabric. Refer to the on-line book
+#
+#      Operating Cisco Application Centric Infrastructure
+#
+#   for examples of the CLI commands to execute these upgrades
+#
+#   sample execution:   ./bin/ansible-playbook apic_cli_example.yml --ask-pass -vv
+#
+#                       ./bin/ansible -m setup APIC
+#
+#                            to display the facts gathered about the hosts in group APIC
+#
+#   the /etc/nasible/hosts file has this entry specified
+#   [APIC]
+#   10.255.139.149 ansible_ssh_user=admin
+#
+#
+- name: Example using APIC cli interface in Ansible
+  hosts: APIC
+
+  tasks:
+  - name:  Print out the management IP address of the controller
+    debug: var=ansible_default_ipv4["address"]
+
+  - name: Print out the interfaces of the controller
+    debug: var=ansible_interfaces
+
+  - name: Print out the IPv4 addresses of all the interfaces on the controller
+    debug: var=ansible_{{item}}["ipv4"]["address"]
+    with_items: ansible_interfaces
+
+  - name:  Example of class query from the CLI,  Command line cousin to visore
+    command: moquery -c fvTenant
+
+  - name:  Issue some CLI command on the controller, for example list the firmware
+    command: firmware list
+
+  - name:  Loop thru a list of nodes in the fabric and determine the firmware upgrade status
+    #      Example of explicitially defining a list of items to loop through
+    #      determine the nodes from the APIC cli command 'attach' followed by two tabs
+    command: firmware upgrade status  node {{ item }}
+    with_items:
+        - NEX-9336-A-Demo
+        - NEX-9336-B-Demo
+        - NEX-9396-A-Demo
+        - NEX-9396-B-Demo
+        - NEX-9396-C-Demo
