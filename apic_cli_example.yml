@@ -22,7 +22,7 @@
 #
 #                            to display the facts gathered about the hosts in group APIC
 #
-#   the /etc/nasible/hosts file has this entry specified
+#   the /etc/ansible/hosts file has this entry specified
 #   [APIC]
 #   10.255.139.149 ansible_ssh_user=admin
 #
