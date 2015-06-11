@@ -1,0 +1,26 @@
+---
+#
+#   Copyright (c) 2015 World Wide Technology, Inc.
+#   All rights reserved.
+#
+#   author: Joel W. King, World Wide Technology
+#
+- name: Ansible ACI Demo of gathering facts on LLDP neighbors
+  hosts:  prod-01
+  connection: local
+  gather_facts: no
+
+  vars:
+    class: lldpAdjEp
+
+  tasks:
+  - name:  LLDP
+    aci_gather_facts:
+     URI: "/api/class/{{class}}.json"
+     host: "{{hostname}}"
+     username: admin
+     password: "{{password}}"
+
+  - name: print out
+    debug: msg= " {{ item.sysName }} ManagementIP {{ item.mgmtIp }} {{ item.portDesc }} {{ item.portIdV }}" 
+    with_items: lldpAdjEp
