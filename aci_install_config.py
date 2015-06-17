@@ -12,6 +12,7 @@
       8 April 2015  |  2.1 - added missing documentation
      28 April 2015  |  2.2 - program documenttion updates
      14 May   2015  |  2.3 - modification for running under Ansible Tower
+     17 June  2015  |  2.4 - corrected cntrl.aaaLogout() placement
    
 """
 
@@ -19,7 +20,7 @@ DOCUMENTATION = '''
 ---
 module: aci_install_config
 author: Joel W. King, World Wide Technology
-version_added: "2.3"
+version_added: "2.4"
 short_description: Loads a configuration file to the northbound interface of a Cisco ACI controller (APIC)
 description:
     - This module reads an XML configuration file and posts to the URI specified to the APIC northbound interface
@@ -173,6 +174,7 @@ def main():
     xml = readxml(module.params["xml_file"]) 
                                   
     code, response = process(cntrl, xml)
+    cntrl.aaaLogout()
 
     if code == 1:
         logger.error('DEVICE=%s STATUS=%s MSG=%s' % (module.params["host"], code, response))
@@ -180,8 +182,7 @@ def main():
     else:
         logger.info('DEVICE=%s STATUS=%s' % (module.params["host"], code))
         module.exit_json(changed=True, content=response)
-
-    cntrl.aaaLogout()  
+  
     return code
 
 

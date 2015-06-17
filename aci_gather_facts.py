@@ -10,6 +10,7 @@
                        1.2 - output format change of returned facts
      27 April 2015  |  1.3 - return a list of MOs rather than a dictionary, using the DN name for the key is an invalid variable name for Ansible
      14 May   2015  |  1.4 - modification for running under Ansible Tower
+     17 June  2015  |  1.5 - corrected cntrl.aaaLogout() placement
  
    
 """
@@ -18,7 +19,7 @@ DOCUMENTATION = '''
 ---
 module: aci_gather_facts
 author: Joel W. King, World Wide Technology
-version_added: "1.4"
+version_added: "1.5"
 short_description: query the APIC controller for facts about a specified class or managed object
 description:
     - This module issues a class or managed object query and returns the answer set as facts for use in a playbook
@@ -243,6 +244,7 @@ def main():
     logger.info("DEVICE=%s URL=%s" %  (module.params["host"], cntrl.generic_URL))
                                   
     code, response = process(cntrl)
+    cntrl.aaaLogout()
 
     if code == 1:
         logger.error('DEVICE=%s STATUS=%s MSG=%s' % (module.params["host"], code, response))
@@ -250,8 +252,7 @@ def main():
     else:
         logger.info('DEVICE=%s STATUS=%s' % (module.params["host"], code))
         module.exit_json(**response)
-
-    cntrl.aaaLogout()  
+  
     return code
 
 
