@@ -13,6 +13,7 @@
      28 April 2015  |  2.2 - program documenttion updates
      14 May   2015  |  2.3 - modification for running under Ansible Tower
      17 June  2015  |  2.4 - corrected cntrl.aaaLogout() placement
+     31 July  2015  |  2.5 - added userid to log file name (ACI training class)
    
 """
 
@@ -20,7 +21,7 @@ DOCUMENTATION = '''
 ---
 module: aci_install_config
 author: Joel W. King, World Wide Technology
-version_added: "2.4"
+version_added: "2.5"
 short_description: Loads a configuration file to the northbound interface of a Cisco ACI controller (APIC)
 description:
     - This module reads an XML configuration file and posts to the URI specified to the APIC northbound interface
@@ -82,6 +83,7 @@ import sys
 import time
 import logging
 import httplib
+import getpass
 
 # ---------------------------------------------------------------------------
 # IMPORT LOGIC 
@@ -103,7 +105,7 @@ except ImportError:
 
 logfilename = 'aci_install_config'
 logger = logging.getLogger(logfilename)
-hdlrObj = logging.FileHandler("/tmp/%s_%s.log" % (logfilename, time.strftime("%j")))
+hdlrObj = logging.FileHandler("/tmp/%s_%s_%s.log" % (logfilename, getpass.getuser(), time.strftime("%j")))
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlrObj.setFormatter(formatter)
 logger.addHandler(hdlrObj)

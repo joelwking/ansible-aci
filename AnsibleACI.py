@@ -4,13 +4,15 @@
 """
    Module for connection between a Python application and a APIC controller
 
-   Copyright (c) 2014 World Wide Technology, Inc.                  
-
+   Copyright (c) 2015 World Wide Technology, Inc.
+                  
+   Author: Joel W. King, World Wide Technology
 
 # Version     Date           Comments
 # ----------- ------------   -------------------------------------------------
 # 2.0         7 April 2015   Refactored for github
 # 2.1        15 April 2015   Removed ppXML, we are using json
+# 2.2         4 Aug   2015   use HTTPs, included "verify=False"
 # 
 #
 """
@@ -25,10 +27,10 @@ class Connection(object):
    
     """
     def __init__(self):                               
-        self.version = "Ver 2.1"                      # Version information
+        self.version = "Ver 2.2"                      # Version information
         self.debug = False                            # When enabled, prints more info for debugging
         self.transporttypes = ["http", "https"]       # Valid transport types
-        self.transport = self.transporttypes[0]       # use HTTP by default
+        self.transport = self.transporttypes[1]       # use HTTPs
                                                       
         self.controllername = "192.0.2.1"             # IP address or hostname of the controller
         self.username = "admin"
@@ -56,7 +58,7 @@ class Connection(object):
         URL = "%s://%s/api/aaaLogout.xml" % (self.transport,self.controllername)
         XML = self.aaaLogout_XML_template % self.username
         try:
-            r = requests.post(URL, data=XML, cookies=self.cookie, headers=self.HEADER)
+            r = requests.post(URL, data=XML, cookies=self.cookie, headers=self.HEADER, verify=False)
         except:
             if self.debug:
                 print "aaaLogout failure XML: %s " % (XML)
@@ -79,7 +81,7 @@ class Connection(object):
         URL = "%s://%s/api/aaaLogin.xml" % (self.transport,self.controllername)
         XML = self.aaaLogin_XML_template % (self.username,self.password)
         try:
-            r = requests.post(URL, data=XML, headers=self.HEADER)
+            r = requests.post(URL, data=XML, headers=self.HEADER, verify=False)
         except requests.ConnectionError as e: 
             print "aaaLogin failure\nURL:\t%s \nXML:\t%s " % (URL, XML)
             return(999)
@@ -181,7 +183,7 @@ class Connection(object):
         URL = self.generic_URL % (self.transport,self.controllername)
         self.content = None
         try:
-            r = requests.post(URL, data=self.generic_XML, cookies=self.cookie, headers=self.HEADER)
+            r = requests.post(URL, data=self.generic_XML, cookies=self.cookie, headers=self.HEADER, verify=False)
         except requests.ConnectionError as e: 
             print "genericPOST failure\nURL:\t%s \nXML:\t%s " % (URL, self.generic_XML)
             return(999)
@@ -199,7 +201,7 @@ class Connection(object):
         URL = self.generic_URL % (self.transport, self.controllername)
         self.content = None
         try:
-            r = requests.get(URL, cookies=self.cookie, headers=self.HEADER)
+            r = requests.get(URL, cookies=self.cookie, headers=self.HEADER, verify=False)
         except requests.ConnectionError as e: 
             print "genericGET failure\nURL:\t%s " % (URL)
             return(999)

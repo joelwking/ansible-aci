@@ -11,6 +11,7 @@
      27 April 2015  |  1.3 - return a list of MOs rather than a dictionary, using the DN name for the key is an invalid variable name for Ansible
      14 May   2015  |  1.4 - modification for running under Ansible Tower
      17 June  2015  |  1.5 - corrected cntrl.aaaLogout() placement
+     3  Aug   2015  |  1.6 - added userid to log file name (ACI training class)
  
    
 """
@@ -19,7 +20,7 @@ DOCUMENTATION = '''
 ---
 module: aci_gather_facts
 author: Joel W. King, World Wide Technology
-version_added: "1.5"
+version_added: "1.6"
 short_description: query the APIC controller for facts about a specified class or managed object
 description:
     - This module issues a class or managed object query and returns the answer set as facts for use in a playbook
@@ -120,6 +121,7 @@ import time
 import logging
 import httplib
 import json
+import getpass
 
 # ---------------------------------------------------------------------------
 # IMPORT LOGIC 
@@ -142,7 +144,7 @@ except ImportError:
 
 logfilename = "aci_gather_facts"
 logger = logging.getLogger(logfilename)
-hdlrObj = logging.FileHandler("/tmp/%s_%s.log" % (logfilename, time.strftime("%j")))
+hdlrObj = logging.FileHandler("/tmp/%s_%s_%s.log" % (logfilename, getpass.getuser(), time.strftime("%j")))
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 hdlrObj.setFormatter(formatter)
 logger.addHandler(hdlrObj)
