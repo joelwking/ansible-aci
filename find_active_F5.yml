@@ -1,0 +1,60 @@
+---
+#
+#      Copyright (c) 2015 World Wide Technology, Inc. 
+#      All rights reserved. 
+#
+#      author: Joel W. King, Mark Wall, Joe Weber, World Wide Technology
+#      short_description: Query ACI for the node reporting F5 virtual IP address, update iRule
+#      description: This playbook issues a class query of fvReportingNode, with a query filter
+#                   wildcard on the virtual IP address shared between two high availablity F5's.
+#                   The F5 appliances are running in an ACI streatched fabric between two
+#                   data centers. The 'east' data center node ID's range from 100-199 and 
+#                   the 'west' data center has nodes ranging from 200-299.
+#                
+#                   Based on the node ID, we identify the management IP address of the 
+#                   F5 BIG‑IP Local Traffic Manager (LTM) currently owning the virtual IP address
+#                   and update an iRule to include the identity the owning F5 on the 
+#                   web content visable to the end user. This funcionality assists in troubleshooting
+#                   by network operations.
+#
+- name: Find what node the active F5 is using and update iRules 
+  hosts: APIC-NGDC-East-1
+  connection: local
+  gather_facts: no
+  vars:
+   vIPaddr: 10.255.80.134 
+   part: apic_4223 
+   pool: apic_4223_5415_ADC
+   datacenter:  
+    - name: east
+      node_s: "100"
+      node_e: "199"
+      F5_mgmt_IP:  10.255.80.12
+    - name: west 
+      node_s: "200"
+      node_e: "299"
+      F5_mgmt_IP:  10.255.81.12
+
+  tasks:
+  - name: Query class fvReportingNode filter on the IP address in the DN
+    aci_gather_facts:
+     queryfilter: 'wcard(fvReportingNode.dn, "{{vIPaddr}}")'
+     URI: /api/class/fvReportingNode.json
+     host: "{{hostname}}"
+     username: "{{username}}" 
+     password: "{{password}}"
+
+  - name: Update iRules on active F5 
+    uri: >
+     validate_certs=no
+     body_format=json
+     HEADER_Content-Type=application/json
+     method=PUT
+     user="{{username}}"
+     password="{{password}}"
+     url="https://{{item.F5_mgmt_IP}}/mgmt/tm/ltm/virtual/~{{part}}~{{pool}}"
+     body='{"rules":["/Common/ngdc_img_replace_{{item.name}}"]}'
+    with_items: datacenter
+    when: fvReportingNode[0].id  >= item.node_s and fvReportingNode[0].id  <= item.node_e 
+
+     
