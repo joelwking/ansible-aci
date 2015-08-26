@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-     Copyright (c) 2014 World Wide Technology, Inc. 
+     Copyright (c) 2015 World Wide Technology, Inc. 
      All rights reserved. 
 
      Revision history:
@@ -14,6 +14,7 @@
      14 May   2015  |  2.3 - modification for running under Ansible Tower
      17 June  2015  |  2.4 - corrected cntrl.aaaLogout() placement
      31 July  2015  |  2.5 - added userid to log file name (ACI training class)
+     25 Aug   2015  |  2.6 - added response requested flag 
    
 """
 
@@ -21,19 +22,20 @@ DOCUMENTATION = '''
 ---
 module: aci_install_config
 author: Joel W. King, World Wide Technology
-version_added: "2.5"
+version_added: "2.6"
 short_description: Loads a configuration file to the northbound interface of a Cisco ACI controller (APIC)
 description:
     - This module reads an XML configuration file and posts to the URI specified to the APIC northbound interface
 
       The module writes a log file to the /tmp directory and imbeds the julian date in the file name. 
-      For example, this file is for day 50, e.g. /tmp/nxapi_install_config_050.log
+      For example, this file is for day 215, e.g. /tmp/aci_install_config_kingjoe_215.log
 
       Refer to the Cisco APIC REST API User Guide for more info on xml and URI formats.
 
  
 requirements:
-    - The module uses the AnsibleACI python module, which must be specified in the PYTHONPATH or in the local directory
+    - The module uses the AnsibleACI python module, which must be specified in the PYTHONPATH, in the local directory
+      or in the library directory specified in the ansible.cfg file (e.g. library = /usr/share/ansible/).
 
 options:
     host:
@@ -60,6 +62,11 @@ options:
         description:
             - The URL required by APIC to issue the request.
         required: true
+
+    response:
+        description:
+            - Flag to indicate if APIC should return a response from the REST call.
+        required: false
 
 '''
 
@@ -142,7 +149,7 @@ def process(cntrl, xml):
 
     rc = cntrl.genericPOST()
     if rc == 200:
-        return (0, "%s: %s" % (rc, httplib.responses[rc]))
+        return (0, "%s: %s %s" % (rc, httplib.responses[rc], cntrl.content))
     else:
         return (1, "%s: %s %s" % (rc, httplib.responses[rc], cntrl.content))
 
@@ -162,19 +169,30 @@ def main():
             host = dict(required=True),
             username = dict(required=True),
             password  = dict(required=True),
+            response = dict(required=False, default=False, type='bool'),
             debug = dict(required=False)
          ),
         check_invalid_arguments=False,
         add_file_common_args=True
     )
     
+    #  Create an Connection object for the controller and set parameters
     cntrl = AnsibleACI.Connection()
     cntrl.setcontrollerIP(module.params["host"])
     cntrl.setUsername(module.params["username"])                               
     cntrl.setPassword(module.params["password"])
-    cntrl.setgeneric_URL("%s://%s" + module.params["URI"])
+    try:
+        if module.params["response"] is True:              #
+            queryfilter = "?rsp-subtree=modified"          # Specifies response requested option
+        else:                                              # In future releases, may be used to
+            queryfilter = ""                               # specify changed flag when exiting.
+    except TypeError:                                      #
+        queryfilter = ""                                   #
+
+    cntrl.setgeneric_URL("%s://%s" + module.params["URI"] + queryfilter)
     xml = readxml(module.params["xml_file"]) 
-                                  
+
+    #  Process request                     
     code, response = process(cntrl, xml)
     cntrl.aaaLogout()
 
