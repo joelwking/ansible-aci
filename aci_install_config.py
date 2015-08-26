@@ -15,6 +15,7 @@
      17 June  2015  |  2.4 - corrected cntrl.aaaLogout() placement
      31 July  2015  |  2.5 - added userid to log file name (ACI training class)
      25 Aug   2015  |  2.6 - added response requested flag 
+     26 Aug   2015  |  2.7 - added idempotency logic for changed flag
    
 """
 
@@ -22,7 +23,7 @@ DOCUMENTATION = '''
 ---
 module: aci_install_config
 author: Joel W. King, World Wide Technology
-version_added: "2.6"
+version_added: "2.7"
 short_description: Loads a configuration file to the northbound interface of a Cisco ACI controller (APIC)
 description:
     - This module reads an XML configuration file and posts to the URI specified to the APIC northbound interface
@@ -63,9 +64,9 @@ options:
             - The URL required by APIC to issue the request.
         required: true
 
-    response:
+    debug:
         description:
-            - Flag to indicate if APIC should return a response from the REST call.
+            - Flag to indicate if output should return a response from the REST call.
         required: false
 
 '''
@@ -138,20 +139,34 @@ def readxml(file_name):
 
 def process(cntrl, xml):
     """ We have all are variables and parameters set in the object, attempt to 
-        login and post the data to the APIC
+        login and post the data to the APIC. If debug is enabled, we will also 
+        include the content returned from the controller due to  ?rsp-subtree=modified
+        provided on all POST requests.
+      
+        When imdata contains status="created" or "modified", the config has changed,
+        otherwise, not. This implements idempotency for this module.
     """
+    response_requested = ""
+    changed_msg = ['status="created"', 'status="modified"']
+    changed = False
+
     if xml == None:
-        return (1, "Unable to read XML file.")              
+        return (1, False, "Unable to read XML file.")              
 
     cntrl.setgeneric_XML(xml)
     if cntrl.aaaLogin() != 200:
-        return (1, "Unable to login to controller")
+        return (1, False, "Unable to login to controller")
 
     rc = cntrl.genericPOST()
     if rc == 200:
-        return (0, "%s: %s %s" % (rc, httplib.responses[rc], cntrl.content))
+        if cntrl.debug:                                    # when debug enabled, include
+            response_requested = cntrl.content             # response data in output 
+        for item in changed_msg:
+            if item in cntrl.content:
+                changed = True
+        return (0, changed, "%s: %s %s" % (rc, httplib.responses[rc], response_requested))
     else:
-        return (1, "%s: %s %s" % (rc, httplib.responses[rc], cntrl.content))
+        return (1, False, "%s: %s %s" % (rc, httplib.responses[rc], cntrl.content))
 
 
 
@@ -169,8 +184,7 @@ def main():
             host = dict(required=True),
             username = dict(required=True),
             password  = dict(required=True),
-            response = dict(required=False, default=False, type='bool'),
-            debug = dict(required=False)
+            debug = dict(required=False, default=False, type='bool')
          ),
         check_invalid_arguments=False,
         add_file_common_args=True
@@ -181,27 +195,21 @@ def main():
     cntrl.setcontrollerIP(module.params["host"])
     cntrl.setUsername(module.params["username"])                               
     cntrl.setPassword(module.params["password"])
-    try:
-        if module.params["response"] is True:              #
-            queryfilter = "?rsp-subtree=modified"          # Specifies response requested option
-        else:                                              # In future releases, may be used to
-            queryfilter = ""                               # specify changed flag when exiting.
-    except TypeError:                                      #
-        queryfilter = ""                                   #
+    cntrl.setDebug(module.params["debug"])
 
-    cntrl.setgeneric_URL("%s://%s" + module.params["URI"] + queryfilter)
+    cntrl.setgeneric_URL("%s://%s" + module.params["URI"] + "?rsp-subtree=modified")
     xml = readxml(module.params["xml_file"]) 
 
     #  Process request                     
-    code, response = process(cntrl, xml)
+    code, changed, response = process(cntrl, xml)
     cntrl.aaaLogout()
 
     if code == 1:
         logger.error('DEVICE=%s STATUS=%s MSG=%s' % (module.params["host"], code, response))
         module.fail_json(msg=response)
     else:
-        logger.info('DEVICE=%s STATUS=%s' % (module.params["host"], code))
-        module.exit_json(changed=True, content=response)
+        logger.info('DEVICE=%s STATUS=%s CHANGED=%s MSG=%s' % (module.params["host"], code, changed, response))
+        module.exit_json(changed=changed, content=response)
   
     return code
 
