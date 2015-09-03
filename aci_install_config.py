@@ -16,6 +16,7 @@
      31 July  2015  |  2.5 - added userid to log file name (ACI training class)
      25 Aug   2015  |  2.6 - added response requested flag 
      26 Aug   2015  |  2.7 - added idempotency logic for changed flag
+      3 Sept  2015  |  2.8 - included status="deleted" as an option to trigger the change flag
    
 """
 
@@ -23,7 +24,7 @@ DOCUMENTATION = '''
 ---
 module: aci_install_config
 author: Joel W. King, World Wide Technology
-version_added: "2.7"
+version_added: "2.8"
 short_description: Loads a configuration file to the northbound interface of a Cisco ACI controller (APIC)
 description:
     - This module reads an XML configuration file and posts to the URI specified to the APIC northbound interface
@@ -143,11 +144,11 @@ def process(cntrl, xml):
         include the content returned from the controller due to  ?rsp-subtree=modified
         provided on all POST requests.
       
-        When imdata contains status="created" or "modified", the config has changed,
+        When imdata contains status="created", "modified", or "deleted", the config has changed,
         otherwise, not. This implements idempotency for this module.
     """
     response_requested = ""
-    changed_msg = ['status="created"', 'status="modified"']
+    changed_msg = ['status="created"', 'status="modified"', 'status="deleted"']
     changed = False
 
     if xml == None:
