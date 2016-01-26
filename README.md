@@ -6,6 +6,10 @@ This is demonstration of Ansible, an open source automation tool, which is used 
 
 These modules have been tested on APIC Version: 1.1(1j).
 
+### ACI Clone Tenant
+
+This module (aci_clone_tenant.py)  creates a new tenant based on a reference, or template tenant. You specify the new tenant name and a description. All references to the template tenant are changed to refer to the new tenant name.
+
 ### ACI Install Config
 
 Ansible playbooks are used to call a python module (aci_install_config.py) Which configures the fabric through the ACI controller (APIC) northbound REST API interface.
