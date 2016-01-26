@@ -1,0 +1,26 @@
+#!/usr/bin/ansible-playbook
+---
+#
+#      Copyright (c) 2016 World Wide Technology, Inc. 
+#      All rights reserved. 
+#
+#      author: Joel W. King,  World Wide Technology
+#
+- name: Ansible ACI clone tenant 
+  hosts:  aci 
+  connection: local
+  gather_facts: no
+
+  tasks:
+  - name: Decrypt the password file
+    include_vars: "./passwords.yml"
+
+  - name: Clone a Tenant  
+    aci_clone_tenant:  
+     host:  "{{inventory_hostname}}" 
+     username:  kingjoe 
+     password: "{{password}}"
+     descr: Example of cloning a tenant from a template joel.king
+     template: mediaWIKI 
+     tenant: xStart
+
