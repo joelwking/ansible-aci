@@ -8,7 +8,7 @@ These modules have been tested on APIC Version: 1.1(1j).
 
 ### ACI Clone Tenant
 
-This module (aci_clone_tenant.py)  creates a new tenant based on a reference, or template tenant. You specify the new tenant name and a description. All references to the template tenant are changed to refer to the new tenant name.
+This module (aci_clone_tenant.py)  creates a new tenant based on a reference, or template tenant. You specify the new tenant name and a description. All references to the template tenant are changed to refer to the new tenant name. This module has been updated to reference an input and output fabric, so tenants can be moved from a test or dev environment to production.
 
 ### ACI Install Config
 
