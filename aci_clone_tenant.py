@@ -11,6 +11,7 @@
      24 January 2016  |  1.0 - initial release
      25 January 2016  |  1.1 - further tweeks on XML to repost
      26 January 2016  |  1.2 - only delete statsHierColl
+      2 Febr    2016  |  2.0 - added ihost and ohost to move between fabrics
 
 """
 DOCUMENTATION = '''
@@ -19,20 +20,25 @@ DOCUMENTATION = '''
 
 module: aci_clone_tenant
 author: Joel W. King, World Wide Technology
-version_added: "1.2"
+version_added: "2.0"
 short_description: Clones a tenant using the northbound interface of a Cisco ACI controller (APIC)
 
 description:
     - This module creates a new tenant based on a reference, or template tenant. You specify the new tenant name and a description.
-      All references to the template tenant are changed to refer to the new tenant name. 
+      All references to the template tenant are changed to refer to the new tenant name. This module can move configurations between
+      separate ACI fabrics by specifing a different host name or IP address for ihost and ohost.
 
 requirements:
     - AnsibleACI module
 
 options:
-    host:
+    ihost:
         description:
-            - The IP address or hostname of the APIC
+            - The IP address or hostname of the APIC where the template exists
+        required: true
+    ohost:
+        description:
+            - The IP address or hostname of the APIC to write the clone 
         required: true
     username:
         description:
@@ -52,19 +58,20 @@ options:
         required: true
     debug:
         description:
-            - A switch to enable debug logging to a file. Use a value of 'on' to enable.
+            - A switch to enable debug. Use a value of 'on' to enable.
         required: false
 
 '''
 
 EXAMPLES = '''
 
-  ansible localhost -m aci_clone_tenant -a "descr=foo tenant=xStart template=mediaWIKI host=10.255.139.149 username=kingjoe password=redacted debug=on"
+  ansible localhost -m aci_clone_tenant -a "descr=foo tenant=xStart template=mediaWIKI ihost=10.255.139.149 ohost=10.255.139.149 username=kingjoe password=redacted debug=on"
 
 
   - name: Clone a Tenant
     aci_clone_tenant:
-     host:  "{{inventory_hostname}}"
+     ihost:  "{{inventory_hostname}}"
+     ohost:  "{{inventory_hostname}}"
      username:  kingjoe
      password: "{{password}}"
      descr: Example of cloning a tenant from a template joel.king
@@ -93,18 +100,23 @@ def get_tenant(cntrl, tenant):
 
     retcode = cntrl.aaaLogin()
     if retcode != 200:
-        return "Unable to login to controller", retcode
+        return "get_tenant: Unable to login to controller", retcode
 
     cntrl.setgeneric_URL("%s://%s" + "/api/mo/uni/tn-%s.xml?rsp-subtree=full&rsp-prop-include=config-only" % tenant)
     retcode = cntrl.genericGET()
+    get_content = cntrl.get_content()
+    cntrl.aaaLogout()
 
-    return cntrl.get_content(), retcode
+    return get_content, retcode
 
 
 
 def post_tenant(cntrl, xml):
     " post the modified xml to create a new tenant from the template"
     
+    retcode = cntrl.aaaLogin()
+    if retcode != 200:
+        return "post_tenant: Unable to login to controller", retcode
     cntrl.setgeneric_XML(xml)
     cntrl.setgeneric_URL("%s://%s/api/mo/uni.xml?rsp-subtree=modified")
     retcode = cntrl.genericPOST()
@@ -170,6 +182,17 @@ def remove_imdata(xml):
 
 
 
+def get_connection_object(host, username, password, debug):
+    " Create an Connection object for the controller and set parameters "
+
+    cntrl = AnsibleACI.Connection()
+    cntrl.setcontrollerIP(host)
+    cntrl.setUsername(username)                               
+    cntrl.setPassword(password)
+    cntrl.setDebug(debug)
+    return cntrl
+
+
 # ---------------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------------
@@ -181,7 +204,8 @@ def main():
             template = dict(required=True),
             descr = dict(required=True),
             tenant = dict(required=True),
-            host = dict(required=True),
+            ihost = dict(required=True),
+            ohost = dict(required=True),
             username = dict(required=True),
             password  = dict(required=True),
             debug = dict(required=False, default=False, type='bool')
@@ -190,25 +214,26 @@ def main():
         add_file_common_args=True
     )
     
-    #  Create an Connection object for the controller and set parameters
-    cntrl = AnsibleACI.Connection()
-    cntrl.setcontrollerIP(module.params["host"])
-    cntrl.setUsername(module.params["username"])                               
-    cntrl.setPassword(module.params["password"])
-    cntrl.setDebug(module.params["debug"])
-
-    #  Process request
+    # We expect the same username and password on both fabrics if moving between fabrics
+    username = module.params["username"] 
+    password = module.params["password"] 
+    debug = module.params["debug"]
+    
+    # Connect to the controller where the template resides
+    cntrl = get_connection_object(module.params["ihost"], username, password, debug)
     xml_string, retcode = get_tenant(cntrl, module.params["template"])
     
     if retcode == 200:
+        # modify and create the cloned template on the target APIC
         new_xml = modify_xml(xml_string, module.params["template"], module.params["tenant"], module.params["descr"])
+        cntrl = get_connection_object(module.params["ohost"], username, password, debug)
         content, retcode = post_tenant(cntrl, new_xml)
         if retcode == 200:
         	module.exit_json(changed=get_changed_flag(content), content=retcode)
         else:
-            module.fail_json(msg="%s %s %s %s %s" % (retcode, "failed to post tenant", module.params["tenant"], retcode, content))
+            module.fail_json(msg="%s %s %s %s" % (retcode, "failed to post tenant", module.params["tenant"], xml_string))
     else:
-    	module.fail_json(msg="%s %s %s %s %s" % (retcode, "failed to get tenant", module.params["tenant"], retcode, xml_string))
+    	module.fail_json(msg="%s %s %s %s" % (retcode, "failed to get tenant", module.params["tenant"], xml_string))
   
     return 
 
