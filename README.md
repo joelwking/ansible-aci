@@ -31,4 +31,9 @@ The aci_gather_facts module can return managed object (MO) queries, see aci_mo_e
 
 Theses modules were demonstrated at the Ansible Durham Meetup on 17 June 2015, the slides are located at http://www.slideshare.net/joelwking/ansible-durham-meetup
 
+Presentation for the vNPUG: Configuration Management Series w/Ansible 
+http://www.npug.net/past-events/
+http://www.slideshare.net/joelwking/one-tool-two-fabrics-ansible-and-nexus-9000
 
+## Press Releases
+Red Hat Brings DevOps to the Network with New Ansible Capabilities https://www.redhat.com/en/about/press-releases/red-hat-brings-devops-network-new-ansible-capabilities
