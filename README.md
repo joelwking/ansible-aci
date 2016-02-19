@@ -4,7 +4,7 @@ Using Ansible for Cisco ACI Deployment and Orchestration.
 ## Modules
 This is demonstration of Ansible, an open source automation tool, which is used to configure a Cisco Application Centric Infrastructure (ACI) fabric. 
 
-These modules have been tested on APIC Version: 1.1(1j).
+These modules have been tested on APIC Version: 1.2(1m)
 
 ### ACI Clone Tenant
 
