@@ -1,0 +1,44 @@
+---
+#
+#
+#      Copyright (c) 2016 World Wide Technology, Inc.
+#      All rights reserved.
+#
+#      author: Joel W. King,   World Wide Technology
+#      short_description: vars for updating security policy of a tenant
+#      description: Sample YAML vars file for automating the application of security policies to a cloned tenant.
+#
+fvTenant:
+  name: xStart10
+  template: xStart_template
+
+fvAp:
+  - name: MANAGEMENT
+    fvAEPg:
+      - name: DHCP
+        fvRsCons:
+          - tnVzBrCPName: MANAGEMENT
+        fvRsProv:
+          - tnVzBrCPName: DNS
+          
+  - name: test_mediaWIKI
+    fvAEPg:
+      - name: Outside
+        fvRsCons:
+          - tnVzBrCPName: HTTP
+          
+      - name: Database
+        fvRsCons:
+          - tnVzBrCPName: DNS
+        fvRsProv:
+          - tnVzBrCPName: MANAGEMENT
+          - tnVzBrCPName: MYSQL
+          
+      - name: Inside  
+        fvRsCons:
+          - tnVzBrCPName: DNS
+          - tnVzBrCPName: MYSQL
+        fvRsProv:
+          - tnVzBrCPName: MANAGEMENT
+          - tnVzBrCPName: HTTP
+

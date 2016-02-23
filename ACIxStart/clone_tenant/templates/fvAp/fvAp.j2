@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Template file fvAp  {{fvTenant.name}}
+ -->
+<fvTenant>
+{% for item in fvAp %}
+    <fvAp  name="{{item.name}}" >
+
+        {% for item in item.fvAEPg %}
+          <fvAEPg  matchT="AtleastOne" name="{{item.name}}" >
+              <!-- Consumed Contracts -->
+              {% if item.fvRsCons is defined %}
+                {% for item in item.fvRsCons %}
+                     <fvRsCons  tnVzBrCPName="{{item.tnVzBrCPName}}"/>
+                {% endfor %}
+              {% endif %}
+
+              <!-- Provided Contracts -->
+              {% if item.fvRsProv is defined %}
+                {% for item in item.fvRsProv %}
+                     <fvRsProv  tnVzBrCPName="{{item.tnVzBrCPName}}"/>
+                {% endfor %}
+              {% endif %}
+
+          </fvAEPg>
+       {% endfor %}
+     </fvAp>
+{% endfor %}
+</fvTenant>
