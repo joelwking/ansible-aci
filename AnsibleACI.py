@@ -4,7 +4,7 @@
 """
    Module for connection between a Python application and a APIC controller
 
-   Copyright (c) 2015 World Wide Technology, Inc.
+   Copyright (c) 2016 World Wide Technology, Inc.
                   
    Author: Joel W. King, World Wide Technology
 
@@ -13,6 +13,7 @@
 # 2.0         7 April 2015   Refactored for github
 # 2.1        15 April 2015   Removed ppXML, we are using json
 # 2.2         4 Aug   2015   use HTTPs, included "verify=False"
+# 2.3         3 Aug   2016   Disable InsecureRequestWarning
 # 
 #
 """
@@ -77,7 +78,7 @@ class Connection(object):
             r.conent also has refreshTimeoutSeconds="600" and creationTime="1399878720"
             time.time() gives the current time in seconds since the Epoch, similar to creationTime
         """
-
+        requests.packages.urllib3.disable_warnings()
         URL = "%s://%s/api/aaaLogin.xml" % (self.transport,self.controllername)
         XML = self.aaaLogin_XML_template % (self.username,self.password)
         try:
