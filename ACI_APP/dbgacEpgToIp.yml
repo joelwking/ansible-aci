@@ -1,0 +1,38 @@
+---
+#
+#      Copyright (c) 2016 World Wide Technology, Inc.
+#      All rights reserved.
+#
+#      author: Joel W. King, World Wide Technology
+#
+#
+- name: dbgacEpgToIp.yml
+  hosts:  aci
+  connection: local
+  gather_facts: no
+  vars:
+    aci:
+      class: dbgacEpgToIp
+      uri: "/api/mo/uni/tn-{{fvTenant}}"
+      user: kingjoe
+
+  tasks:
+    - name: Decrypt the password file
+      include_vars: "./passwords.yml"
+
+    - name: Debug variables
+      debug: msg="{{name}} {{dstIp}} {{fvTenant}} {{ap}} {{epg}} {{srcPort}} {{prot}}"
+      
+    - name: Create XML from template
+      template:
+        src: "./{{aci.class}}.j2"
+        dest: "./{{aci.class}}.xml"
+
+    - name:  Apply atomic counter configuration to APIC
+      aci_install_config:
+        xml_file: "./{{aci.class}}.xml"
+        URI: "{{aci.uri}}.xml"
+        host: "{{inventory_hostname}}"
+        username: "{{aci.user}}"
+        password: "{{password}}"
+        debug: on

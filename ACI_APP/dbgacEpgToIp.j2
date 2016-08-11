@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  dbgacEpgToIp.j2   joel.king     -->
+<dbgacEpgToIp name="{{name}}" dstIp="{{dstIp}}" dn="uni/tn-{{fvTenant}}/epgToIp-{{name}}" descr="Phantom generated" adminSt="enabled">
+	<dbgacRsAcExtPolToContext tDn="uni/tn-common/ctx-Common-VRF"/>
+	<dbgacFilter name="{{srcPort}}" descr="Phantom generated" srcPort="{{srcPort}}" prot="{{prot}}" dstPort="unspecified"/>
+	<dbgacRsFromEpg tDn="uni/tn-{{fvTenant}}/ap-{{ap}}/epg-{{epg}}"/>
+</dbgacEpgToIp>
