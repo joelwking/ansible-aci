@@ -14,7 +14,7 @@
 # 2.1        15 April 2015   Removed ppXML, we are using json
 # 2.2         4 Aug   2015   use HTTPs, included "verify=False"
 # 2.3         3 Aug   2016   Disable InsecureRequestWarning
-# 
+# 2.5        22 Aug   2016   Conditionally Disable InsecureRequestWarning due to backlevel python on APIC
 #
 """
 import requests
@@ -78,7 +78,12 @@ class Connection(object):
             r.conent also has refreshTimeoutSeconds="600" and creationTime="1399878720"
             time.time() gives the current time in seconds since the Epoch, similar to creationTime
         """
-        requests.packages.urllib3.disable_warnings()
+        try:
+            requests.packages.urllib3.disable_warnings()
+        except AttributeError:
+            # Older versions of Requests do not support 'disable_warnings'
+            pass
+
         URL = "%s://%s/api/aaaLogin.xml" % (self.transport,self.controllername)
         XML = self.aaaLogin_XML_template % (self.username,self.password)
         try:
