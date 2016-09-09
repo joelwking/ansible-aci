@@ -30,6 +30,20 @@ Our use case is to meet the requirements of the network security administrator, 
 
 The aci_gather_facts module can return managed object (MO) queries, see aci_mo_example.yml as an example of how to use this feature.
 
+## Installation
+Assuming you are running this playbook from userid 'administrator'  with sudo permissions, download the the Ansible modules to /usr/share/ansible.
+```
+sudo rm -rf /usr/share/ansible
+sudo mkdir /usr/share/ansible
+sudo chown administrator  /usr/share/ansible
+sudo chgrp administrator  /usr/share/ansible
+```
+The ansible.cfg file should specify the directory in the library variable:
+```
+library        = /usr/share/ansible/
+```
+You may also need to run `dos2unix` on the downloaded module(s)
+
 ## Presentation
 
 Theses modules were demonstrated at the Ansible Durham Meetup on 17 June 2015, the slides are located at http://www.slideshare.net/joelwking/ansible-durham-meetup
