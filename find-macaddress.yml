@@ -1,27 +1,30 @@
+#!/usr/bin/ansible-playbook
 ---
 #
-#   Copyright (c) 2015 World Wide Technology, Inc.
-#   All rights reserved.
+#      Copyright (c) 2016 World Wide Technology, Inc.
+#      All rights reserved.
 #
-#   author: Joel W. King, World Wide Technology
+#      author: Joel W. King  World Wide Technology
 #
 - name: Ansible ACI Demo of gathering facts using a class query
-  hosts: prod-01
+  hosts: APIC 
   connection: local
   gather_facts: no
   vars:
-   IPaddr: 198.51.100.4
+   IPaddr: 192.0.2.5 
 
   tasks:
-  - name: Find the MAC address given an IP address
-    aci_gather_facts:
-     queryfilter: 'eq(fvCEp.ip, "{{IPaddr}}")'
-     URI: /api/class/fvCEp.json
+  - name: Decrypt the password file
+    include_vars: "./passwords.yml"
+
+  - name: Find the MAC address given an IP address 
+    aci_gather_facts: 
+     queryfilter: 'eq(fvCEp.ip, "{{IPaddr}}")' 
+     URI: /api/class/fvCEp.json 
      host: "{{hostname}}"
      username: admin
      password: "{{password}}"
 
-  - name: Print fields, IP, mac, etc. 
+  - name: use msg format
     debug: msg=" ManagementIP {{ fvCEp[0].ip }}  mac {{ fvCEp[0].mac }} encap {{ fvCEp[0].encap }} "
-
-
+    when:  fvCEp[0].ip is defined 
