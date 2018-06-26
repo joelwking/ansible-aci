@@ -1,6 +1,0 @@
-<!-- Security Policy contract and subject for TCP Small servers -->
-<vzBrCP scope="context" prio="unspecified" ownerTag="" ownerKey="" name="SMALL_SERVERS" dn="uni/tn-ANSIBLE_DEMO/brc-SMALL_SERVERS" descr="Name of a contract to apply between two or more EPGs under the Application Profile.">
-<vzSubj prio="unspecified" name="Ansible_Demo_Subject" descr="subjects within a contract use filters to specify the type of traffic that can be communicated." revFltPorts="yes" provMatchT="AtleastOne" consMatchT="AtleastOne">
-<vzRsSubjFiltAtt tnVzFilterName="TCP_SMALL_SERVERS"/>
-</vzSubj>
-</vzBrCP>
