@@ -1,0 +1,106 @@
+---
+
+acl: 
+  - contract_name: "QA_Bling_E-to-Default"
+    contract_descr: Marketing_M1a
+    contract_subject_name: "sub-QA_Bling_E-to-Default"
+    contract_subject_descr: Marketing_M1a
+    filter_name: "tcp-135"
+    filter_descr: Marketing_M1a
+    entry_name: "tcp-port_135"
+    filter_entry_descr: ent_descr
+    ip_protocol: tcp
+    ether_type: ip
+    dst_port_start: 135
+    dst_port_end: 135
+
+  - contract_name: "QA_Bling_E-to-Default"
+    contract_descr: Marketing_M1a
+    contract_subject_name: "sub-QA_Bling_E-to-Default"
+    contract_subject_descr: Marketing_M1a
+    filter_name: "tcp-1433"
+    filter_descr: Marketing_M1a
+    entry_name: "tcp-port_1433"
+    filter_entry_descr: ent_descr
+    ip_protocol: tcp
+    ether_type: ip
+    dst_port_start: 1433
+    dst_port_end: 1433
+ 
+  - contract_name: "QA_Bling_E-to-Default"
+    contract_descr: Marketing_M1a
+    contract_subject_name: "sub-QA_Bling_E-to-Default"
+    contract_subject_descr: Marketing_M1a
+    filter_name: "tcp-445"
+    filter_descr: Marketing_M1a
+    entry_name: "tcp-port_445"
+    filter_entry_descr: ent_descr
+    ip_protocol: tcp
+    ether_type: ip
+    dst_port_start: 445
+    dst_port_end: 445
+ 
+  - contract_name: "QA_Bling_E-to-Default"
+    contract_descr: Marketing_M1a
+    contract_subject_name: "sub-QA_Bling_E-to-Default"
+    contract_subject_descr: Marketing_M1a
+    filter_name: "tcp-49154"
+    filter_descr: Marketing_M1a
+    entry_name: "tcp-port_49154"
+    filter_entry_descr: ent_descr
+    ip_protocol: tcp
+    ether_type: ip
+    dst_port_start: 49154
+    dst_port_end: 49154
+ 
+  - contract_name: "QA_Bling_E-to-Default"
+    contract_descr: Marketing_M1a
+    contract_subject_name: "sub-QA_Bling_E-to-Default"
+    contract_subject_descr: Marketing_M1a
+    filter_name: "tcp-5022"
+    filter_descr: Marketing_M1a
+    entry_name: "tcp-port_5022"
+    filter_entry_descr: ent_descr
+    ip_protocol: tcp
+    ether_type: ip
+    dst_port_start: 5022
+    dst_port_end: 5022
+ 
+  - contract_name: "QA_Bling_E-to-Default"
+    contract_descr: Marketing_M1a
+    contract_subject_name: "sub-QA_Bling_E-to-Default"
+    contract_subject_descr: Marketing_M1a
+    filter_name: "tcp-5985"
+    filter_descr: Marketing_M1a
+    entry_name: "tcp-port_5985"
+    filter_entry_descr: ent_descr
+    ip_protocol: tcp
+    ether_type: ip
+    dst_port_start: 5985
+    dst_port_end: 5985
+ 
+  - contract_name: "QA_Bling_E-to-Default"
+    contract_descr: Marketing_M1a
+    contract_subject_name: "sub-QA_Bling_E-to-Default"
+    contract_subject_descr: Marketing_M1a
+    filter_name: "udp-52311"
+    filter_descr: Marketing_M1a
+    entry_name: "udp-port_52311"
+    filter_entry_descr: ent_descr
+    ip_protocol: udp
+    ether_type: ip
+    dst_port_start: 52311
+    dst_port_end: 52311
+ 
+  - contract_name: "QA_Bling_Enterprise-to-Management_Nets"
+    contract_descr: Marketing_M1a
+    contract_subject_name: "sub-QA_Bling_Enterprise-to-Management_Nets"
+    contract_subject_descr: Marketing_M1a
+    filter_name: "icmp-0"
+    filter_descr: Marketing_M1a
+    entry_name: "icmp-port_0"
+    filter_entry_descr: ent_descr
+    ip_protocol: icmp
+    ether_type: ip
+    dst_port_start: 0
+    dst_port_end: 0

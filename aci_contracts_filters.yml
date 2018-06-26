@@ -1,0 +1,137 @@
+#!/usr/bin/ansible-playbook
+---
+#
+#      Copyright (c) 2018 World Wide Technology, Inc.
+#      All rights reserved.
+#
+#      author: @joelwking
+#
+#      description: 
+#        This playbook uses policy information exported from Tetration,  
+#        which has been transform(ed) into a yaml file, used to create Contracts, 
+#        Subjects, Filters and Filter entries in ACI. We assume the tenant exists.
+#
+#      usage:
+#
+#        ./aci_contracts_filters.yml -e "password=bigsecret input=foo"
+#
+#        ./aci_contracts_filters.yml -e "password=bigsecret desired_state=absent"
+#
+#
+- name: Create ACI Contracts and Filters from Tetration policy analysis
+  hosts:  localhost
+  connection: local
+  gather_facts: no
+
+  vars_files:
+    - '{{ playbook_dir }}/files/passwords.yml' 
+
+  vars:
+    #
+    #  These are default values which can be overridden at run time
+    #  -e EXTRA_VARS, --extra-vars=EXTRA_VARS
+    #                    set additional variables as key=value or YAML/JSON, if filename prepend with @
+    #
+    input: Marketing_M1a
+    tenant: tetration_policy_enforce                       # tenant name
+    ap: foo                                                # application profile
+    desired_state: present                                 # 'present' (to create) or 'absent' (to delete)
+    scope: tenant                                          # 'application-profile' or 'tenant'
+    reverse_filter: no                                     # 'yes' or 'no' should filter be reversed?
+    log: log                                               # Determines if the binding should be set to log
+    validate_certs: no                                     # certificate verify
+    password: '{{ apic.password }}'                        # specify the actual password as an extra var
+
+  tasks:
+    - name: Include input file
+      include_vars: '{{ playbook_dir }}/files/{{ input }}.yml'
+#
+#   Contract and contract subject section
+#
+    - name: Add (or delete) the contract
+      aci_contract:
+        hostname: '{{ apic.hostname }}'
+        username: '{{ apic.username }}'
+        password: '{{ password }}'
+        validate_certs: '{{ validate_certs }}'
+        state: '{{ desired_state }}'
+        #
+        contract: '{{ item.contract_name }}'
+        description: '{{ item.contract_descr }}'
+        tenant: '{{ tenant }}'
+        scope: '{{ scope }}'  
+      with_items: '{{ acl }}'
+      tags: contract
+
+    - name: Add the contract subject
+      aci_contract_subject:
+        hostname: '{{ apic.hostname }}'
+        username: '{{ apic.username }}'
+        password: '{{ password }}'
+        validate_certs: '{{ validate_certs }}'
+        state: '{{ desired_state }}'      
+        #
+        tenant: '{{ tenant }}'
+        contract:  '{{ item.contract_name }}'
+        subject: '{{ item.contract_subject_name }}'
+        description: '{{ item.contract_subject_descr }}'
+        reverse_filter: '{{ reverse_filter }}'
+        dscp: unspecified
+      with_items: '{{ acl }}'
+      when: desired_state == "present"                     # Deleting contract deletes subject
+      tags: subject
+#
+#   Filter Section
+#
+    - name: Add (or delete) a filter to a tenant
+      aci_filter:
+        hostname: '{{ apic.hostname }}'
+        username: '{{ apic.username }}'
+        password: '{{ password }}'
+        validate_certs: '{{ validate_certs }}'
+        state: '{{ desired_state }}'
+        #
+        tenant: '{{ tenant }}'
+        filter: '{{ item.filter_name }}'
+        description: '{{ item.filter_descr }}'
+      with_items: '{{ acl }}'
+      tags: filter
+
+    - name: Add the filter entry to the filter
+      aci_filter_entry:
+        hostname: '{{ apic.hostname }}'
+        username: '{{ apic.username }}'
+        password: '{{ password }}'
+        validate_certs: '{{ validate_certs }}'
+        state: '{{ desired_state }}'
+        #
+        tenant: '{{ tenant }}'
+        filter: '{{ item.filter_name }}'                   # Name of Filter that the entry should belong to.
+        entry: '{{ item.entry_name }}'                     # Name of the filter entry.
+        description: '{{ item.filter_entry_descr }}'       # Description of the filter entry.
+        ether_type: '{{ item.ether_type }}'                # Ethernet type, IP, arp, etc.
+        ip_protocol: '{{ item.ip_protocol }}'              # IP Protocol type when ether_type is ip, e.g. tcp, udp, etc.
+        dst_port_start: '{{ item.dst_port_start }}'        # Starting L4 port number.
+        dst_port_end: '{{ item.dst_port_end }}'            # Ending L4 port number.
+      with_items: '{{ acl }}'
+      when: desired_state == "present"                     # Deleting the filter deletes the entry
+      tags: entry
+#
+#   Bind the filter Section
+#
+    - name: Bind the filter to the contract subject
+      aci_contract_subject_to_filter:
+        hostname: '{{ apic.hostname }}'
+        username: '{{ apic.username }}'
+        password: '{{ password }}'
+        validate_certs: '{{ validate_certs }}'
+        state: '{{ desired_state }}'
+        #
+        tenant: '{{ tenant }}'
+        contract:  '{{ item.contract_name }}'
+        subject: '{{ item.contract_subject_name }}'
+        filter: '{{ item.filter_name }}'
+        log: '{{ log }}'
+      with_items: '{{ acl }}'
+      when: desired_state == "present"                     # No need to bind if deleting object
+      tags: bind
