@@ -13,7 +13,7 @@
 #
 #      usage:
 #
-#        ./aci_contracts_filters.yml -e "password=bigsecret input=foo"
+#        ./aci_contracts_filters.yml -e "password=bigsecret input=foo tenant=JOELKING"
 #
 #        ./aci_contracts_filters.yml -e "password=bigsecret desired_state=absent"
 #
@@ -32,7 +32,7 @@
     #  -e EXTRA_VARS, --extra-vars=EXTRA_VARS
     #                    set additional variables as key=value or YAML/JSON, if filename prepend with @
     #
-    input: Marketing_M1a
+    input: Marketing_M1a                                   # sample input file
     tenant: tetration_policy_enforce                       # tenant name
     ap: foo                                                # application profile
     desired_state: present                                 # 'present' (to create) or 'absent' (to delete)
