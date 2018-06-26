@@ -1,6 +1,9 @@
 # ansible-aci
 Using Ansible for Cisco ACI Deployment and Orchestration.
 
+## NOTE
+THIS CONTENT HAS BEEN DEPRECATED! Please refer to the Cisco ACI supported modules in Ansible 2.4 and later releases.
+
 ## Modules
 This is demonstration of Ansible, an open source automation tool, which is used to configure a Cisco Application Centric Infrastructure (ACI) fabric. 
 
