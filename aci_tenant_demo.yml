@@ -1,0 +1,42 @@
+#!/usr/bin/ansible-playbook
+---
+#
+#      Copyright (c) 2018 World Wide Technology, Inc.
+#      All rights reserved.
+#
+#      author: @joelwking
+#
+#      description:
+#          Basic playbook to create or delete a tenant in ACI
+#
+#      usage:
+#      
+#        ./aci_tenant_demo.yml -e "password=bigsecret tenant=JOELKING"
+#                              -e "password=bigsecret desired_state=absent"
+#
+- name: Create (or delete) a tenant in ACI
+  hosts:  localhost
+  connection: local
+  gather_facts: no
+
+  vars_files:
+    - '{{ playbook_dir }}/files/passwords.yml' 
+
+  vars:
+    #  These are default values which can be overridden at run time using -e or --extra-vars
+    description: "@joelwking"
+    tenant: JOELKING                                       # tenant name
+    desired_state: present                                 # 'present' (to create) or 'absent' (to delete)
+    validate_certs: no                                     # certificate verify
+    password: '{{ apic.password }}'                        # specify the actual password as an extra var
+
+  tasks:
+    - name: Create (or delete) tenant
+      aci_tenant:
+        hostname: '{{ apic.hostname }}'
+        username: '{{ apic.username }}'
+        password: '{{ password }}'
+        validate_certs: '{{ validate_certs }}'
+        tenant: '{{ tenant }}'
+        description: '{{ description }}'
+        state: '{{ desired_state }}'
