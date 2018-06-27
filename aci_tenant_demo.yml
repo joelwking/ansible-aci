@@ -24,7 +24,7 @@
 
   vars:
     #  These are default values which can be overridden at run time using -e or --extra-vars
-    description: "@joelwking"
+    description: "@joelwking"                              # tenant description
     tenant: JOELKING                                       # tenant name
     desired_state: present                                 # 'present' (to create) or 'absent' (to delete)
     validate_certs: no                                     # certificate verify
