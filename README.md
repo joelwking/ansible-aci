@@ -10,6 +10,9 @@ This repo has been revised to reflect the changes and enhancements in the Cisco 
 
 ## Playbooks
 
+### aci_tenant_demo
+This playbook adds or deletes an ACI Tenant.
+
 ### aci_contracts_filters
 This playbook adds or deletes the Contract, Subject, Filter, Filter entries for a tenant in an ACI fabric. The input file has been converted to YAML from the output of a Tetration ADM run. This use case was demonstrated at [DevNet Create 2018](https://www2.wwt.com/all-blog/devnet-create-2018/). 
 
